@@ -1,6 +1,7 @@
+require('dotenv').config();
 const path = require('node:path');
 const fs = require('node:fs');
-const { Client, GatewayIntentBits, Collection, EmbedBuilder, Colors } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 // Author: SomeDumbFox#1234
 // Creator: hyppytyynytyydytys#1010
@@ -30,11 +31,11 @@ const { Client, GatewayIntentBits, Collection, EmbedBuilder, Colors } = require(
 
 /**---------------------------------------Start Configuration------------------------------------------------------------**/
 //Paste you discord bot token here
-const token = process.env.TOKEN || 'paste_token'
+const token = process.env.TOKEN;
 //Paste your pins channel as a string
 //discordjs uses "Snowflakes" which are 64 bit signed Integers represented as strings.
 //Pasting as an integer will cause integer collisions
-const pinsChannel = '0'
+const pinsChannel = process.env.PINS_CHANNEL;
 //Enter as comma seperated strings IE ['001', '002']
 var blacklistedChannels = []
 //Archival Behavior
@@ -148,8 +149,9 @@ client.on('channelPinsUpdate', async (channel, time) => {
 				var embed = buildEmbed(unpinnedMessage)
 				channel.guild.channels.fetch(pinsChannel).then(archiveChannel => {
 					bulkSend(archiveChannel, embed)
+					archiveChannel.send('bruh')
 				})
-				channel.send(`Removing ${(lastPinArchive) ? "last" : "first"} saved pin. See archived pin in: <#${pinsChannel}>`)
+				// channel.send(`Removing ${(lastPinArchive) ? "last" : "first"} saved pin. See archived pin in: <#${pinsChannel}>`)
 				channel.messages.unpin(unpinnedMessage, "Archive Pin")
 			} else {
 				console.log("Pin Max Not reached")
@@ -181,25 +183,26 @@ client.login(token);
  * @param {*} messageToEmbed 
  * @returns 
  */
-function buildEmbed(messageToEmbed) {
+ function buildEmbed(messageToEmbed) {
 	if(messageToEmbed.embeds.length > 0)
 		return messageToEmbed.embeds
-	var e = new EmbedBuilder()
+
+	var embed = new EmbedBuilder()
 		.setFooter({ text: `sent in ${messageToEmbed.channel.name} at: ${messageToEmbed.createdAt}` })
-		.setTitle(`message by ${messageToEmbed.author.username}`)
+		.setAuthor({ name: messageToEmbed.author.username, iconURL: messageToEmbed.author.avatarURL() })
 		.setColor(Colors[Object.keys(Colors)[Math.floor(Math.random() * Object.keys(Colors).length)]])
 		.addFields(
 			{ name: "Jump", value: messageToEmbed.url, inline: false }
 		)
 	
 	if(messageToEmbed.content)
-		e.setDescription(`${messageToEmbed.content}`)
+		embed.setDescription(`${messageToEmbed.content}`)
 	if (messageToEmbed.attachments.size > 0) {
 		if (messageToEmbed.attachments.first().contentType.includes("image"))
-			e.setImage(messageToEmbed.attachments.first().attachment)
+			embed.setImage(messageToEmbed.attachments.first().attachment)
 	}
-	return [e]
 
+	return [embed]
 }
 
 /**
