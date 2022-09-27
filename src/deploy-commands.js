@@ -1,3 +1,4 @@
+require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 const { REST } = require('@discordjs/rest');
@@ -5,11 +6,11 @@ const { Routes } = require('discord.js');
 
 /**---------------------------------------Start Configuration------------------------------------------------------------**/
 //Paste your bot client id
-const clientId = ''
+const clientId = process.env.CLIENT_ID;
 //Paste your guild id
-const guildId = ''
+const guildId = process.env.GUILD_ID;
 //Paste your discord bot token
-const token = ''
+const token = process.env.TOKEN;
 /**----------------------------------------End Configuration-------------------------------------------------------------**/
 
 const commands = [];
