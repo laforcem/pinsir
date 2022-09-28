@@ -3,31 +3,6 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { Client, GatewayIntentBits, Collection, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
-// Author: SomeDumbFox#1234
-// Creator: hyppytyynytyydytys#1010
-// Created: 26 MAY 2020
-// Last updated: 17 JULY 2022
-// About: This is a 1:1 port of PasselBot, originally written in discordpy, to use the 
-//        discordjs event handlers. This implementation is meant for private use only
-//        and can only be run on 1 server.
-
-//        Passel Bot is a solution to the number of limited number of pins in a discord server.
-//        It manages pins in 2 lastPinArchives, lastPinArchive 1 and lastPinArchive 2. 
-
-//        More information can be found on https://passelbot.wixsite.com/home
-//        Passel Support Server: https://discord.gg/wmSsKCX
-
-//        lastPinArchive - false: The most recent pinned message gets sent to a pins archive
-//        channel of your choice. This means that the most recent pin wont be viewable in
-//        the pins tab, but will be visible in the pins archive channel that you chose during setup
-
-//        lastPinArchive - true: The oldest pinned message gets sent to a pins archive channel of
-//        your choice. This means that the most recent pin will be viewable in the pins tab, and
-//        the oldest pin will be unpinned and put into the pins archive channel
-
-//        Furthermore: the p.sendAll feature described later in the code allows the user to set
-//        Passel so that all pinned messages get sent to the pins archive channel.
-
 
 /**---------------------------------------Start Configuration------------------------------------------------------------**/
 //Paste you discord bot token here
@@ -183,7 +158,8 @@ client.login(token);
  * @param {*} messageToEmbed 
  * @returns 
  */
- function buildEmbed(messageToEmbed) {
+function buildEmbed(messageToEmbed) {
+
 	if(messageToEmbed.embeds.length > 0)
 		return messageToEmbed.embeds
 
