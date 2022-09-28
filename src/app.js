@@ -124,7 +124,6 @@ client.on('channelPinsUpdate', async (channel, time) => {
 				var embed = buildEmbed(unpinnedMessage)
 				channel.guild.channels.fetch(pinsChannel).then(archiveChannel => {
 					bulkSend(archiveChannel, embed)
-					archiveChannel.send('bruh')
 				})
 				// channel.send(`Removing ${(lastPinArchive) ? "last" : "first"} saved pin. See archived pin in: <#${pinsChannel}>`)
 				channel.messages.unpin(unpinnedMessage, "Archive Pin")
