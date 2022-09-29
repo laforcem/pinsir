@@ -12,10 +12,10 @@ const token = process.env.TOKEN;
 //Pasting as an integer will cause integer collisions
 const pinsChannel = process.env.PINS_CHANNEL;
 //Enter as comma seperated strings IE ['001', '002']
-var blacklistedChannels = []
+const blacklistedChannels = []
 //Archival Behavior
-var lastPinArchive = true // set false if first pin gets archived.
-var sendAll = false
+const lastPinArchive = true // set false if first pin gets archived.
+const sendAll = false
 /**----------------------------------------End Configuration-------------------------------------------------------------**/
 
 
@@ -58,16 +58,16 @@ client.on('interactionCreate', async (interaction) => {
 client.on('channelPinsUpdate', async (channel, time) => {
 	console.log('pin event detected')
 	//check if update happened in blacklisted channel. This uses the guild cache as a dirty means to find the channel.
-	for (channelId in blacklistedChannels) {
+	for (let channelId in blacklistedChannels) {
 		if (channel.id === channelId)
 			console.log("encountered pin update in blacklisted channel")
 		return
 	}
 
-	//Make sure the pins channel is still available.
-	var isPinsChannelPresent = false
-	var channelList = channel.guild.channels.cache.values()
-	for (item of channelList) {
+	// Make sure the pins channel is still available.
+	let isPinsChannelPresent = false
+	let channelList = channel.guild.channels.cache.values()
+	for (let item of channelList) {
 		if (item.id === pinsChannel)
 			isPinsChannelPresent = true
 	}
@@ -83,11 +83,11 @@ client.on('channelPinsUpdate', async (channel, time) => {
 
 			//when sendAll is on, clear pins and archive all
 			if (sendAll && messages.size > 49) {
-				var pinEmbeds = []
+				let pinEmbeds = []
 				console.log("unpinning all messages")
 				//build embeds
-				for (message of messages) {
-					var embeds = buildEmbed(message[1])
+				for (let message of messages) {
+					let embeds = buildEmbed(message[1])
 					pinEmbeds = pinEmbeds.concat(embeds)
 				}
 
@@ -98,7 +98,7 @@ client.on('channelPinsUpdate', async (channel, time) => {
 				}
 
 				//unpin them all
-				for(message of messages){
+				for(let message of messages){
 					channel.messages.unpin(message[1], "Send All Pin Archive")
 				}
 
@@ -118,10 +118,10 @@ client.on('channelPinsUpdate', async (channel, time) => {
 			//sendAll not enabled, archive and post single pin when full
 			if (messages.size > 49 && !sendAll) {
 				console.log('Removing Last Pinned Message!')
-				var unpinnedMessage = (lastPinArchive) ? messages.last() : messages.first()
+				let unpinnedMessage = (lastPinArchive) ? messages.last() : messages.first()
 				channel.messages.unpin(unpinnedMessage)
 				channel.send(`Removing ${(lastPinArchive) ? "last" : "first"} saved pin. See archived pin in: <#${pinsChannel}>`)
-				var embed = buildEmbed(unpinnedMessage)
+				let embed = buildEmbed(unpinnedMessage)
 				channel.guild.channels.fetch(pinsChannel).then(archiveChannel => {
 					bulkSend(archiveChannel, embed)
 				})
@@ -162,7 +162,7 @@ function buildEmbed(messageToEmbed) {
 	if(messageToEmbed.embeds.length > 0)
 		return messageToEmbed.embeds
 
-	var embed = new EmbedBuilder()
+	let embed = new EmbedBuilder()
 		.setFooter({ text: `sent in ${messageToEmbed.channel.name} at: ${messageToEmbed.createdAt}` })
 		.setAuthor({ name: messageToEmbed.author.username, iconURL: messageToEmbed.author.avatarURL() })
 		.setColor(Colors[Object.keys(Colors)[Math.floor(Math.random() * Object.keys(Colors).length)]])
