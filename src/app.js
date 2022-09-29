@@ -22,8 +22,9 @@ const sendAll = false
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-// Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds] }); // Create new client instance
+
 //copy current settings to client
 client.commands = new Collection();
 client.pinsChannel = pinsChannel
@@ -31,32 +32,37 @@ client.blacklistedChannels = blacklistedChannels
 client.lastPinArchive = lastPinArchive
 client.sendAll = sendAll
 
-//client commands setup !!REQUIRES SLASH COMMAND REGISTRATION!!
+//client commands setup (requires slash command registration)
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
-	// Set a new item in the Collection
-	// With the key as the command name and the value as the exported module
+
+	// Set a new item in the Collection with the key as the command name and the value as the exported module
 	client.commands.set(command.data.name, command);
 }
 
 //client interaction logic
 client.on('interactionCreate', async (interaction) => {
-	if (!interaction.isChatInputCommand()) return;
 	const command = client.commands.get(interaction.commandName);
+
+	if (!interaction.isChatInputCommand()) return;
+
 	if (!command) return;
 
 	try {
 		await command.execute(interaction, client);
 	} catch (error) {
 		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		await interaction.reply({ content: 'Error while executing command', ephemeral: true });
 	}
 });
 
-//Logic to process on Pin Event
+// Logic to process on pin event
 client.on('channelPinsUpdate', async (channel, time) => {
-	console.log('pin event detected')
+	console.log('Pin event detected\n')
+	let isPinsChannelPresent = false
+	let channelList = channel.guild.channels.cache.values()
+
 	//check if update happened in blacklisted channel. This uses the guild cache as a dirty means to find the channel.
 	for (let channelId in blacklistedChannels) {
 		if (channel.id === channelId)
@@ -65,12 +71,11 @@ client.on('channelPinsUpdate', async (channel, time) => {
 	}
 
 	// Make sure the pins channel is still available.
-	let isPinsChannelPresent = false
-	let channelList = channel.guild.channels.cache.values()
 	for (let item of channelList) {
 		if (item.id === pinsChannel)
 			isPinsChannelPresent = true
 	}
+
 	if (!isPinsChannelPresent) {
 		channel.send("Check to see if the pins archive channel during setup has been deleted")
 		return
@@ -91,14 +96,14 @@ client.on('channelPinsUpdate', async (channel, time) => {
 					pinEmbeds = pinEmbeds.concat(embeds)
 				}
 
-				if(pinEmbeds.length == 0){
+				if (pinEmbeds.length == 0) {
 					channel.send(
 						`Tried to build embeds but failed to build any. Can not archive messages.`)
 					return
 				}
 
 				//unpin them all
-				for(let message of messages){
+				for (let message of messages){
 					channel.messages.unpin(message[1], "Send All Pin Archive")
 				}
 
