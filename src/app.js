@@ -11,7 +11,7 @@ const blacklistedChannels = [] // Blacklisted channel ID's (as strings)
 
 // Archival behavior
 const lastPinArchive = true // Archive the oldest pin in a channel when true
-const sendAll = false
+const sendAll = true
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -63,7 +63,7 @@ client.on('channelPinsUpdate', async (channel, time) => {
 		return
 	}
 
-	// Make sure the pins channel is still available.
+	// Make sure the pins channel is still available
 	for (let item of channelList) {
 		if (item.id === pinsChannel)
 			isPinsChannelPresent = true
@@ -82,7 +82,8 @@ client.on('channelPinsUpdate', async (channel, time) => {
 			// when sendAll is on, clear pins and archive all
 			if (sendAll && messages.size > 49) {
 				let pinEmbeds = []
-				console.log("unpinning all messages")
+				console.log("Unpinning all messages\n")
+
 				// build embeds
 				for (let message of messages) {
 					let embeds = buildEmbed(message[1])
@@ -91,7 +92,7 @@ client.on('channelPinsUpdate', async (channel, time) => {
 
 				if (pinEmbeds.length == 0) {
 					channel.send(
-						`Tried to build embeds but failed to build any. Can not archive messages.`)
+						`Tried to build embeds but failed to build any. Cannot archive messages.`)
 					return
 				}
 
@@ -125,7 +126,7 @@ client.on('channelPinsUpdate', async (channel, time) => {
 				let button = buildButton(unpinnedMessage)
 
 				channel.guild.channels.fetch(pinsChannel).then(archiveChannel => {
-					bulkSend(archiveChannel, embed, button)
+					archiveChannel.send({embeds: embed, components: [new ActionRowBuilder().addComponents(button)]})
 				})
 
 				channel.messages.unpin(unpinnedMessage, "Archive Pin")
@@ -170,7 +171,8 @@ function buildEmbed(messageToEmbed) {
 		.setColor(Colors[Object.keys(Colors)[Math.floor(Math.random() * Object.keys(Colors).length)]])
 	
 	if (messageToEmbed.content)
-		embed.setDescription('**' + `${messageToEmbed.content}` + '**')
+		embed.setDescription(`${messageToEmbed.content}`)
+
 	if (messageToEmbed.attachments.size > 0) {
 		if (messageToEmbed.attachments.first().contentType.includes("image"))
 			embed.setImage(messageToEmbed.attachments.first().attachment)
@@ -199,6 +201,6 @@ function buildButton(messageToEmbed) {
  * @param {*} embed 
  * @param {*} button
  */
-function bulkSend(channel, embed, button){
-	channel.send({embeds: embed, components: [new ActionRowBuilder().addComponents(button)]})
+function bulkSend(channel, embed){
+	channel.send({embeds: embed})
 }
