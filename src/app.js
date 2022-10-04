@@ -141,7 +141,7 @@ client.on('channelPinsUpdate', async (channel, time) => {
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
-	console.log('Ready!');
+	console.log('Ready!\n');
 });
 
 client.on("error", (error) =>{
@@ -166,12 +166,9 @@ function buildEmbed(messageToEmbed) {
 		.setFooter({ text: `sent in ${messageToEmbed.channel.name} at: ${messageToEmbed.createdAt}` })
 		.setAuthor({ name: messageToEmbed.author.username, iconURL: messageToEmbed.author.avatarURL() })
 		.setColor(Colors[Object.keys(Colors)[Math.floor(Math.random() * Object.keys(Colors).length)]])
-		.addFields(
-			{ name: "Jump", value: messageToEmbed.url, inline: false }
-		)
 	
-	if(messageToEmbed.content)
-		embed.setDescription(`${messageToEmbed.content}`)
+	if (messageToEmbed.content)
+		embed.setDescription('**' + `${messageToEmbed.content}` + '**')
 	if (messageToEmbed.attachments.size > 0) {
 		if (messageToEmbed.attachments.first().contentType.includes("image"))
 			embed.setImage(messageToEmbed.attachments.first().attachment)
