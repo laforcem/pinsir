@@ -1,6 +1,7 @@
 require('dotenv').config();
 const path = require('node:path');
 const fs = require('node:fs');
+const moment = require('moment');
 const { Client, GatewayIntentBits, Collection, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 
@@ -158,12 +159,13 @@ client.login(token);
  * @returns 
  */
 function buildEmbed(messageToEmbed) {
+	const dateCreated = moment(messageToEmbed.createdAt).format('MMMM Do YYYY, h:mm a');
 
 	if(messageToEmbed.embeds.length > 0)
 		return messageToEmbed.embeds
 
 	let embed = new EmbedBuilder()
-		.setFooter({ text: `sent in ${messageToEmbed.channel.name} at: ${messageToEmbed.createdAt}` })
+		.setFooter({ text: `sent in ${messageToEmbed.channel.name} on ` + dateCreated })
 		.setAuthor({ name: messageToEmbed.author.username, iconURL: messageToEmbed.author.avatarURL() })
 		.setColor(Colors[Object.keys(Colors)[Math.floor(Math.random() * Object.keys(Colors).length)]])
 	
