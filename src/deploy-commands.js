@@ -4,14 +4,13 @@ const path = require('node:path');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord.js');
 
-/**---------------------------------------Start Configuration------------------------------------------------------------**/
-//Paste your bot client id
+// Discord application ID
 const clientId = process.env.CLIENT_ID;
-//Paste your guild id
+// Discord server ID
 const guildId = process.env.GUILD_ID;
-//Paste your discord bot token
+// Bot token
 const token = process.env.TOKEN;
-/**----------------------------------------End Configuration-------------------------------------------------------------**/
+
 
 const commands = [];
 const commandsPath = path.join(__dirname, 'commands');
