@@ -4,35 +4,27 @@ const fs = require('node:fs');
 const { Client, GatewayIntentBits, Collection, EmbedBuilder, Colors, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 
-/**---------------------------------------Start Configuration------------------------------------------------------------**/
-//Paste you discord bot token here
-const token = process.env.TOKEN;
-//Paste your pins channel as a string
-//discordjs uses "Snowflakes" which are 64 bit signed Integers represented as strings.
-//Pasting as an integer will cause integer collisions
-const pinsChannel = process.env.PINS_CHANNEL;
-//Enter as comma seperated strings IE ['001', '002']
-const blacklistedChannels = []
-//Archival Behavior
-const lastPinArchive = true // set false if first pin gets archived.
+const token = process.env.TOKEN; // Bot token
+const pinsChannel = process.env.PINS_CHANNEL; // Pins channel id
+const blacklistedChannels = [] // Blacklisted channel ID's (as strings)
+
+// Archival behavior
+const lastPinArchive = true // Archive the oldest pin in a channel when true
 const sendAll = false
-/**----------------------------------------End Configuration-------------------------------------------------------------**/
-
-
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] }); // Create new client instance
 
-//copy current settings to client
+// copy current settings to client
 client.commands = new Collection();
 client.pinsChannel = pinsChannel
 client.blacklistedChannels = blacklistedChannels
 client.lastPinArchive = lastPinArchive
 client.sendAll = sendAll
 
-//client commands setup (requires slash command registration)
+// Client commands setup (requires slash command registration)
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
@@ -41,7 +33,7 @@ for (const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
-//client interaction logic
+// client interaction logic
 client.on('interactionCreate', async (interaction) => {
 	const command = client.commands.get(interaction.commandName);
 
@@ -63,7 +55,7 @@ client.on('channelPinsUpdate', async (channel, time) => {
 	let isPinsChannelPresent = false
 	let channelList = channel.guild.channels.cache.values()
 
-	//check if update happened in blacklisted channel. This uses the guild cache as a dirty means to find the channel.
+	// check if update happened in blacklisted channel. This uses the guild cache as a dirty means to find the channel.
 	for (let channelId in blacklistedChannels) {
 		if (channel.id === channelId)
 			console.log("encountered pin update in blacklisted channel")
@@ -83,14 +75,14 @@ client.on('channelPinsUpdate', async (channel, time) => {
 
 
 	try {
-		//Get all pinned messages in the channel
+		// Get all pinned messages in the channel
 		channel.messages.fetchPinned().then((messages) => {
 
-			//when sendAll is on, clear pins and archive all
+			// when sendAll is on, clear pins and archive all
 			if (sendAll && messages.size > 49) {
 				let pinEmbeds = []
 				console.log("unpinning all messages")
-				//build embeds
+				// build embeds
 				for (let message of messages) {
 					let embeds = buildEmbed(message[1])
 					pinEmbeds = pinEmbeds.concat(embeds)
@@ -102,15 +94,15 @@ client.on('channelPinsUpdate', async (channel, time) => {
 					return
 				}
 
-				//unpin them all
+				// unpin them all
 				for (let message of messages){
 					channel.messages.unpin(message[1], "Send All Pin Archive")
 				}
 
-				//send embeds in bulk
+				// send embeds in bulk
 				channel.guild.channels.fetch(pinsChannel).then(archiveChannel => {
-					//can only send 10 embeds at a time. splice out pinEmbeds and send deleted contents
-					//repeat until array is empty
+					// can only send 10 embeds at a time. splice out pinEmbeds and send deleted contents
+					// repeat until array is empty
 					do {
 						bulkSend(archiveChannel, pinEmbeds.splice(0, 10))
 					} while (pinEmbeds.length > 0)
@@ -120,7 +112,7 @@ client.on('channelPinsUpdate', async (channel, time) => {
 				console.log("sendAll not enabled or pin max not reached")
 			}
 
-			//sendAll not enabled, archive and post single pin when full
+			// sendAll not enabled, archive and post single pin when full
 			if (messages.size > 49 && !sendAll) {
 				console.log('Removing Last Pinned Message!')
 				let unpinnedMessage = (lastPinArchive) ? messages.last() : messages.first()
@@ -156,7 +148,6 @@ client.on("error", (error) =>{
 client.login(token);
 
 
-//Functions
 /**
  * Creates and returns an embed based on the message contents
  * @param {*} messageToEmbed 
@@ -191,5 +182,5 @@ function buildEmbed(messageToEmbed) {
  * @param {*} whatToSend 
  */
 function bulkSend(channel, whatToSend){
-		channel.send({embeds: whatToSend})
+	channel.send({embeds: whatToSend})
 }
