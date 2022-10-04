@@ -109,23 +109,27 @@ client.on('channelPinsUpdate', async (channel, time) => {
 				})
 				return
 			} else {
-				console.log("sendAll not enabled or pin max not reached")
+				console.log("sendAll disenabled or pin max not reached\n")
 			}
 
 			// sendAll not enabled, archive and post single pin when full
 			if (messages.size > 49 && !sendAll) {
-				console.log('Removing Last Pinned Message!')
 				let unpinnedMessage = (lastPinArchive) ? messages.last() : messages.first()
+
+				console.log('Removing last pin\n')
 				channel.messages.unpin(unpinnedMessage)
 				channel.send(`Removing ${(lastPinArchive) ? "last" : "first"} saved pin. See archived pin in: <#${pinsChannel}>`)
+				
 				let embed = buildEmbed(unpinnedMessage)
+				let button = buildButton(unpinnedMessage)
+
 				channel.guild.channels.fetch(pinsChannel).then(archiveChannel => {
-					bulkSend(archiveChannel, embed)
+					bulkSend(archiveChannel, embed, button)
 				})
-				// channel.send(`Removing ${(lastPinArchive) ? "last" : "first"} saved pin. See archived pin in: <#${pinsChannel}>`)
+
 				channel.messages.unpin(unpinnedMessage, "Archive Pin")
 			} else {
-				console.log("Pin Max Not reached")
+				console.log("Pin max not reached\n")
 			}
 		}).catch(error => {
 			console.log(error)
@@ -177,10 +181,25 @@ function buildEmbed(messageToEmbed) {
 }
 
 /**
+ * Creates and returns a button based on the message contents
+ * @param {*} messageToEmbed
+ * @returns
+ */
+function buildButton(messageToEmbed) {
+	let button = new ButtonBuilder()
+		.setLabel("Jump")
+		.setStyle(5) // link style
+		.setURL(messageToEmbed.url)
+
+	return button
+}
+
+/**
  * Bulk sends embeds with a given channel
  * @param {*} channel 
- * @param {*} whatToSend 
+ * @param {*} embed 
+ * @param {*} button
  */
-function bulkSend(channel, whatToSend){
-	channel.send({embeds: whatToSend})
+function bulkSend(channel, embed, button){
+	channel.send({embeds: embed, components: [new ActionRowBuilder().addComponents(button)]})
 }
