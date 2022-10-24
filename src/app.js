@@ -82,9 +82,7 @@ client.on("channelPinsUpdate", async (channel, time) => {
 	}
 
 	if (!isPinsChannelPresent) {
-		channel.send(
-			"Check to see if the pins archive channel during setup has been deleted"
-		);
+		channel.send("Pins channel missing, check config.");
 		return;
 	}
 
@@ -126,7 +124,7 @@ client.on("channelPinsUpdate", async (channel, time) => {
 					});
 					return;
 				} else {
-					console.log("sendAll disenabled or pin max not reached\n");
+					console.log("sendAll is false or pin max is not reached\n");
 				}
 
 				// sendAll not enabled, archive and post single pin when full
@@ -188,8 +186,6 @@ function buildEmbed(messageToEmbed) {
 		"MMMM Do YYYY, h:mm a"
 	);
 
-	if (messageToEmbed.embeds.length > 0) return messageToEmbed.embeds;
-
 	let embed = new EmbedBuilder()
 		.setFooter({
 			text: `sent in ${messageToEmbed.channel.name} on ` + dateCreated,
@@ -207,6 +203,14 @@ function buildEmbed(messageToEmbed) {
 		);
 
 	if (messageToEmbed.content) embed.setDescription(`${messageToEmbed.content}`);
+
+	// if message has link attachments, add them to the embed
+	if (/(https?:\/\/[^\s]+)/g.test(messageToEmbed.content)) {
+		// parse message to isolate URL
+		let url = messageToEmbed.content.match(/(https?:\/\/[^\s]+)/g)[0];
+		embed.setImage(url);
+		console.log("regex is good\n");
+	}
 
 	if (messageToEmbed.attachments.size > 0) {
 		if (messageToEmbed.attachments.first().contentType.includes("image"))
@@ -234,7 +238,6 @@ function buildButton(messageToEmbed) {
  * Bulk sends embeds with a given channel
  * @param {*} channel
  * @param {*} embed
- * @param {*} button
  */
 function bulkSend(channel, embed) {
 	channel.send({ embeds: embed });
