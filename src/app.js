@@ -207,11 +207,16 @@ function buildEmbed(messageToEmbed) {
 	// if message has text, add it to the embed
 	if (messageToEmbed.content) embed.setDescription(`${messageToEmbed.content}`);
 
-	// iterate message contents, replace newlines with spaces, check for image links, and add to embed
-	for (let content of messageToEmbed.content.replace(/\n/g, " ").split(" ")) {
-		if (isImage(content)) {
-			embed.setImage(content);
-			break;
+	// if message has embeds, add them to the embed
+	if (messageToEmbed.attachments.size > 0) {
+		embed.setImage(messageToEmbed.attachments.first().url);
+	} else {
+		// iterate through message contents and replace newlines with spaces
+		for (let content of messageToEmbed.content.replace(/\n/g, " ").split(" ")) {
+			if (isImage(content)) {
+				embed.setImage(content);
+				break; // first image link will be used
+			}
 		}
 	}
 
