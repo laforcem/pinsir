@@ -138,7 +138,7 @@ client.on("channelPinsUpdate", async (channel, time) => {
 					channel.send(
 						`Removing ${
 							lastPinArchive ? "last" : "first"
-						} saved pin. See archived pin in: <#${pinsChannel}>`
+						} saved pin. See archived pin in <#${pinsChannel}>`
 					);
 
 					let embed = buildEmbed(unpinnedMessage);
@@ -182,6 +182,9 @@ client.login(token);
  * @returns
  */
 function buildEmbed(messageToEmbed) {
+	let embedCount = 0;
+	let hasImage = false;
+
 	// format date and time with moment
 	const dateCreated = moment(messageToEmbed.createdAt).format(
 		"MMMM Do YYYY, h:mm a"
@@ -189,7 +192,7 @@ function buildEmbed(messageToEmbed) {
 
 	let embed = new EmbedBuilder()
 		.setFooter({
-			text: `sent in ${messageToEmbed.channel.name} on ` + dateCreated,
+			text: `sent in ${messageToEmbed.channel.name} on ${dateCreated}`,
 		})
 		.setAuthor({
 			name: messageToEmbed.author.username,
@@ -209,15 +212,36 @@ function buildEmbed(messageToEmbed) {
 
 	// if message has embeds, add them to the embed
 	if (messageToEmbed.attachments.size > 0) {
+		hasImage = true;
+		embedCount += messageToEmbed.attachments.size;
 		embed.setImage(messageToEmbed.attachments.first().url);
-	} else {
-		// iterate through message contents and replace newlines with spaces
-		for (let content of messageToEmbed.content.replace(/\n/g, " ").split(" ")) {
-			if (isImage(content)) {
+	}
+
+	// iterate through message contents and replace newlines with spaces
+	for (let content of messageToEmbed.content.replace(/\n/g, " ").split(" ")) {
+		if (isImage(content)) {
+			embedCount++;
+
+			// only set image if there is not already an image
+			if (!hasImage) {
+				hasImage = true;
 				embed.setImage(content);
-				break; // first image link will be used
 			}
 		}
+	}
+
+	// if message has more than one image, add a field to the embed
+	if (embedCount >= 3) {
+		console.log("made it in\n");
+		embed.addFields({
+			name: "\u200b",
+			value: `:warning: \`Message contains ${embedCount - 1} more images\``,
+		});
+	} else if (embedCount == 2) {
+		embed.addFields({
+			name: "\u200b",
+			value: `\`Message contains 1 more image\``,
+		});
 	}
 
 	return [embed];
