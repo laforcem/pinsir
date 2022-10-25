@@ -10,7 +10,6 @@ const {
 	Colors,
 	ActionRowBuilder,
 	ButtonBuilder,
-	ButtonStyle,
 } = require("discord.js");
 
 const token = process.env.TOKEN; // Bot token
@@ -90,6 +89,7 @@ client.on("channelPinsUpdate", async (channel, time) => {
 		// Get all pinned messages in the channel
 		channel.messages
 			.fetchPinned()
+
 			.then((messages) => {
 				// when sendAll is on, clear pins and archive all
 				if (sendAll && messages.size > 49) {
@@ -182,6 +182,7 @@ client.login(token);
  * @returns
  */
 function buildEmbed(messageToEmbed) {
+	// format date and time with moment
 	const dateCreated = moment(messageToEmbed.createdAt).format(
 		"MMMM Do YYYY, h:mm a"
 	);
@@ -194,6 +195,7 @@ function buildEmbed(messageToEmbed) {
 			name: messageToEmbed.author.username,
 			iconURL: messageToEmbed.author.avatarURL(),
 		})
+		// set color of embed to random color
 		.setColor(
 			Colors[
 				Object.keys(Colors)[
@@ -202,6 +204,7 @@ function buildEmbed(messageToEmbed) {
 			]
 		);
 
+	// if message has text, add it to the embed
 	if (messageToEmbed.content) embed.setDescription(`${messageToEmbed.content}`);
 
 	// iterate message contents, replace newlines with spaces, check for image links, and add to embed
@@ -233,12 +236,14 @@ function buildButton(messageToEmbed) {
  * Bulk sends embeds with a given channel
  * @param {*} channel
  * @param {*} embed
+ * @returns
  */
 function bulkSend(channel, embed) {
 	channel.send({ embeds: embed });
 }
 
 /**
+ * Checks if a string is an image link
  * @param {*} url
  * @returns
  */
