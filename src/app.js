@@ -204,17 +204,12 @@ function buildEmbed(messageToEmbed) {
 
 	if (messageToEmbed.content) embed.setDescription(`${messageToEmbed.content}`);
 
-	// if message has link attachments, add them to the embed
-	if (/(https?:\/\/[^\s]+)/g.test(messageToEmbed.content)) {
-		// parse message to isolate URL
-		let url = messageToEmbed.content.match(/(https?:\/\/[^\s]+)/g)[0];
-		embed.setImage(url);
-		console.log("regex is good\n");
-	}
-
-	if (messageToEmbed.attachments.size > 0) {
-		if (messageToEmbed.attachments.first().contentType.includes("image"))
-			embed.setImage(messageToEmbed.attachments.first().attachment);
+	// iterate message contents, replace newlines with spaces, check for image links, and add to embed
+	for (let content of messageToEmbed.content.replace(/\n/g, " ").split(" ")) {
+		if (isImage(content)) {
+			embed.setImage(content);
+			break;
+		}
 	}
 
 	return [embed];
@@ -241,4 +236,12 @@ function buildButton(messageToEmbed) {
  */
 function bulkSend(channel, embed) {
 	channel.send({ embeds: embed });
+}
+
+/**
+ * @param {*} url
+ * @returns
+ */
+function isImage(url) {
+	return /^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
 }
