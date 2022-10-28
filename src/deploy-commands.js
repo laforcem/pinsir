@@ -5,29 +5,29 @@ const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord.js");
 
 // Discord application ID
-const clientId = process.env.CLIENT_ID;
+const CLIENT_ID = process.env.CLIENT_ID;
 // Discord server ID
-const guildId = process.env.GUILD_ID;
+const GUILD_ID = process.env.GUILD_ID;
 // Bot token
-const token = process.env.TOKEN;
+const TOKEN = process.env.TOKEN;
 
-const commands = [];
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs
-	.readdirSync(commandsPath)
+const COMMANDS = [];
+const COMMANDS_PATH = path.join(__dirname, "commands");
+const COMMAND_FILES = fs
+	.readdirSync(COMMANDS_PATH)
 	.filter((file) => file.endsWith(".js"));
 
-for (const file of commandFiles) {
-	const filePath = path.join(commandsPath, file);
-	const command = require(filePath);
-	commands.push(command.data.toJSON());
+for (const file of COMMAND_FILES) {
+	const FILE_PATH = path.join(COMMANDS_PATH, file);
+	const COMMAND = require(FILE_PATH);
+	COMMANDS.push(COMMAND.data.toJSON());
 }
 
-const rest = new REST({ version: "10" }).setToken(token);
+const rest = new REST({ version: "10" }).setToken(TOKEN);
 
 //Comment the following lines out to delete commands
 rest
-	.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
+	.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: COMMANDS })
 	.then((data) =>
 		console.log(`Successfully registered ${data.length} application commands.`)
 	)
