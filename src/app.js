@@ -232,7 +232,6 @@ function buildEmbed(messageToEmbed) {
 
 	// if message has more than one image, add a field to the embed
 	if (embedCount >= 3) {
-		console.log("made it in\n");
 		embed.addFields({
 			name: "\u200b",
 			value: `:warning: \`Message contains ${embedCount - 1} more images\``,
