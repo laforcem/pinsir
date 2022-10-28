@@ -12,47 +12,47 @@ const {
 	ButtonBuilder,
 } = require("discord.js");
 
-const token = process.env.TOKEN; // Bot token
-const pinsChannel = process.env.PINS_CHANNEL; // Pins channel id
-const blacklistedChannels = []; // Blacklisted channel ID's (as strings)
+const TOKEN = process.env.TOKEN; // Bot token
+const PINS_CHANNEL = process.env.PINS_CHANNEL; // Pins channel id
+const BLACKLISTED_CHANNELS = []; // Blacklisted channel ID's (as strings)
 
 // Archival behavior
-const lastPinArchive = true; // Archive the oldest pin in a channel when true
-const sendAll = false;
+const LAST_PIN_ARCHIVE = true; // Archive the oldest pin in a channel when true
+const SEND_ALL = false;
 
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs
-	.readdirSync(commandsPath)
+const COMMANDS_PATH = path.join(__dirname, "commands");
+const COMMAND_FILES = fs
+	.readdirSync(COMMANDS_PATH)
 	.filter((file) => file.endsWith(".js"));
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] }); // Create new client instance
+const CLIENT = new Client({ intents: [GatewayIntentBits.Guilds] }); // Create new client instance
 
 // copy current settings to client
-client.commands = new Collection();
-client.pinsChannel = pinsChannel;
-client.blacklistedChannels = blacklistedChannels;
-client.lastPinArchive = lastPinArchive;
-client.sendAll = sendAll;
+CLIENT.commands = new Collection();
+CLIENT.pinsChannel = PINS_CHANNEL;
+CLIENT.blacklistedChannels = BLACKLISTED_CHANNELS;
+CLIENT.lastPinArchive = LAST_PIN_ARCHIVE;
+CLIENT.sendAll = SEND_ALL;
 
 // Client commands setup (requires slash command registration)
-for (const file of commandFiles) {
-	const filePath = path.join(commandsPath, file);
-	const command = require(filePath);
+for (const file of COMMAND_FILES) {
+	const FILE_PATH = path.join(COMMANDS_PATH, file);
+	const COMMAND = require(FILE_PATH);
 
 	// Set a new item in the Collection with the key as the command name and the value as the exported module
-	client.commands.set(command.data.name, command);
+	CLIENT.commands.set(COMMAND.data.name, COMMAND);
 }
 
 // client interaction logic
-client.on("interactionCreate", async (interaction) => {
-	const command = client.commands.get(interaction.commandName);
+CLIENT.on("interactionCreate", async (interaction) => {
+	const COMMAND = CLIENT.commands.get(interaction.commandName);
 
 	if (!interaction.isChatInputCommand()) return;
 
-	if (!command) return;
+	if (!COMMAND) return;
 
 	try {
-		await command.execute(interaction, client);
+		await COMMAND.execute(interaction, CLIENT);
 	} catch (error) {
 		console.error(error);
 		await interaction.reply({
@@ -63,13 +63,13 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 // Logic to process on pin event
-client.on("channelPinsUpdate", async (channel, time) => {
+CLIENT.on("channelPinsUpdate", async (channel, time) => {
 	console.log("Pin event detected\n");
 	let isPinsChannelPresent = false;
 	let channelList = channel.guild.channels.cache.values();
 
 	// check if update happened in blacklisted channel. This uses the guild cache as a dirty means to find the channel.
-	for (let channelId in blacklistedChannels) {
+	for (let channelId in BLACKLISTED_CHANNELS) {
 		if (channel.id === channelId)
 			console.log("encountered pin update in blacklisted channel");
 		return;
@@ -77,7 +77,7 @@ client.on("channelPinsUpdate", async (channel, time) => {
 
 	// Make sure the pins channel is still available
 	for (let item of channelList) {
-		if (item.id === pinsChannel) isPinsChannelPresent = true;
+		if (item.id === PINS_CHANNEL) isPinsChannelPresent = true;
 	}
 
 	if (!isPinsChannelPresent) {
@@ -92,7 +92,7 @@ client.on("channelPinsUpdate", async (channel, time) => {
 
 			.then((messages) => {
 				// when sendAll is on, clear pins and archive all
-				if (sendAll && messages.size > 49) {
+				if (SEND_ALL && messages.size > 49) {
 					let pinEmbeds = [];
 					console.log("Unpinning all messages\n");
 
@@ -115,7 +115,7 @@ client.on("channelPinsUpdate", async (channel, time) => {
 					}
 
 					// send embeds in bulk
-					channel.guild.channels.fetch(pinsChannel).then((archiveChannel) => {
+					channel.guild.channels.fetch(PINS_CHANNEL).then((archiveChannel) => {
 						// can only send 10 embeds at a time. splice out pinEmbeds and send deleted contents
 						// repeat until array is empty
 						do {
@@ -128,8 +128,8 @@ client.on("channelPinsUpdate", async (channel, time) => {
 				}
 
 				// sendAll not enabled, archive and post single pin when full
-				if (messages.size > 49 && !sendAll) {
-					let unpinnedMessage = lastPinArchive
+				if (messages.size > 49 && !SEND_ALL) {
+					let unpinnedMessage = LAST_PIN_ARCHIVE
 						? messages.last()
 						: messages.first();
 
@@ -137,14 +137,14 @@ client.on("channelPinsUpdate", async (channel, time) => {
 					channel.messages.unpin(unpinnedMessage);
 					channel.send(
 						`Removing ${
-							lastPinArchive ? "last" : "first"
-						} saved pin. See archived pin in <#${pinsChannel}>`
+							LAST_PIN_ARCHIVE ? "last" : "first"
+						} saved pin. See archived pin in <#${PINS_CHANNEL}>`
 					);
 
 					let embed = buildEmbed(unpinnedMessage);
 					let button = buildButton(unpinnedMessage);
 
-					channel.guild.channels.fetch(pinsChannel).then((archiveChannel) => {
+					channel.guild.channels.fetch(PINS_CHANNEL).then((archiveChannel) => {
 						archiveChannel.send({
 							embeds: embed,
 							components: [new ActionRowBuilder().addComponents(button)],
@@ -165,16 +165,16 @@ client.on("channelPinsUpdate", async (channel, time) => {
 });
 
 // When the client is ready, run this code (only once)
-client.once("ready", () => {
+CLIENT.once("ready", () => {
 	console.log("Ready!\n");
 });
 
-client.on("error", (error) => {
+CLIENT.on("error", (error) => {
 	console.log(error);
 });
 
 // Login to Discord with your client's token
-client.login(token);
+CLIENT.login(TOKEN);
 
 /**
  * Creates and returns an embed based on the message contents
@@ -186,13 +186,13 @@ function buildEmbed(messageToEmbed) {
 	let hasImage = false;
 
 	// format date and time with moment
-	const dateCreated = moment(messageToEmbed.createdAt).format(
+	const DATE_CREATED = moment(messageToEmbed.createdAt).format(
 		"MMMM Do YYYY, h:mm a"
 	);
 
 	let embed = new EmbedBuilder()
 		.setFooter({
-			text: `sent in ${messageToEmbed.channel.name} on ${dateCreated}`,
+			text: `sent in ${messageToEmbed.channel.name} on ${DATE_CREATED}`,
 		})
 		.setAuthor({
 			name: messageToEmbed.author.username,
