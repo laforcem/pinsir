@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require("discord.js");
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("settings")
-		.setDescription("The configured settings for this bot"),
+		.setDescription("See Pinsir's current settings"),
 	async execute(interaction, client) {
 		var channelMentions = [];
 
