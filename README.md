@@ -14,21 +14,20 @@ Note: The way Pinsir is currently written does not support multiple servers. One
   - If using OAuth2 -> URL Generator, select the scopes `bot` and `applications.commands`, and then just `Administrator` for permissions.
   - (Recommended) Under Bot -> Authorization Flow, disable `Public Bot` and `Requires OAuth2 Code Grant`.
 
-- Ensure that Node.js >=16.17.0 is installed on your system, along with `npm` >=8.15.0.
-
 ### Run the bot
 
 1. Clone this repo, then run `npm install` to install dependencies.
+
 2. Create a `.env` file with the following information:
 
-```txt
-TOKEN = yourDiscord.bot_Token
-CLIENT_ID = botApplicationID
-GUILD_ID = discordServerID
-PINS_CHANNEL = serverPinsChannelID
-```
+    ```txt
+    TOKEN = yourDiscord.bot_Token
+    CLIENT_ID = botApplicationID
+    GUILD_ID = discordServerID
+    PINS_CHANNEL = serverPinsChannelID
+    ```
 
-where `TOKEN` is your private alphanumeric bot token, `CLIENT_ID` is the Application ID for your bot, `GUILD_ID` is the ID number of your Discord server, and `PINS_CHANNEL` is the ID of the text channel where you want your pins to be stored.
+    where `TOKEN` is your private alphanumeric bot token, `CLIENT_ID` is the Application ID for your bot, `GUILD_ID` is the ID number of your Discord server, and `PINS_CHANNEL` is the ID of the text channel where you want your pins to be stored.
 
 3. Run the command deployment script with `npm run register`. If you modify the functionality of [src/deploy-commands.js](src/deploy-commands.js), this will need to be run again.
 
@@ -38,7 +37,7 @@ where `TOKEN` is your private alphanumeric bot token, `CLIENT_ID` is the Applica
 
 `/settings`: Returns the current archive channel, any blacklisted channels, the archive mode, and the date of this build of the bot. This is an excellent way to ensure that your settings are correct.
 
-`pins`: Returns the number of pinned messages in the channel in which the command is run.
+`/pins`: Returns the number of pinned messages in the channel in which the command is run.
 
 ## Configuration options
 
