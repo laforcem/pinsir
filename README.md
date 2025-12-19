@@ -1,5 +1,8 @@
 # Pinsir, a pin management bot for Discord
 
+This repository has been archived since Discord has increased the pin limit from 50 to 250. I personally will not be hitting this limit in any of my channels anytime soon.
+---
+
 Pinsir is a Discord bot for pin management. Given Discord's 50-message cap on the pins in any channel, Pinsir can migrate old/new pins to a specific channel to work around this limitation.  
 This bot was originally forked from [somedumbfox/passel-js](https://github.com/somedumbfox/passel-js), but I have since modified it to overhaul embed quality and build it around my own purposes.
 
